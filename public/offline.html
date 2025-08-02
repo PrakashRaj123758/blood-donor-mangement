@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Blood Bank Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .offline-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .offline-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .offline-icon {
+            font-size: 4rem;
+            color: #f59e0b;
+            margin-bottom: 20px;
+        }
+        
+        .offline-title {
+            font-size: 2rem;
+            color: #374151;
+            margin-bottom: 15px;
+        }
+        
+        .offline-message {
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .offline-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-offline {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary-offline {
+            background: #ea580c;
+            color: white;
+        }
+        
+        .btn-primary-offline:hover {
+            background: #c2410c;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary-offline {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary-offline:hover {
+            background: #e5e7eb;
+        }
+        
+        .connection-status {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        .retry-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-card">
+            <div class="offline-icon">
+                <i class="fas fa-wifi-slash"></i>
+            </div>
+            
+            <h1 class="offline-title">You're Offline</h1>
+            
+            <p class="offline-message">
+                It looks like you've lost your internet connection. 
+                Don't worry - your data is safe and will be synchronized 
+                when you're back online.
+            </p>
+            
+            <div class="offline-actions">
+                <button class="btn-offline btn-primary-offline" onclick="retryConnection()">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+                <button class="btn-offline btn-secondary-offline" onclick="goHome()">
+                    <i class="fas fa-home"></i> Go Home
+                </button>
+            </div>
+            
+            <div class="connection-status" id="connectionStatus">
+                <span class="retry-indicator"></span>
+                Checking connection...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let retryCount = 0;
+        const maxRetries = 10;
+        
+        function retryConnection() {
+            retryCount++;
+            updateStatus('Checking connection...', 'checking');
+            
+            fetch('/api/inventory')
+                .then(response => {
+                    if (response.ok) {
+                        updateStatus('Connection restored! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else {
+                        throw new Error('Server error');
+                    }
+                })
+                .catch(error => {
+                    if (retryCount < maxRetries) {
+                        updateStatus(`Connection failed. Retry ${retryCount}/${maxRetries}`, 'error');
+                    } else {
+                        updateStatus('Unable to connect. Please check your internet connection.', 'error');
+                    }
+                });
+        }
+        
+        function updateStatus(message, type) {
+            const statusElement = document.getElementById('connectionStatus');
+            const indicator = statusElement.querySelector('.retry-indicator');
+            
+            statusElement.textContent = message;
+            statusElement.className = 'connection-status';
+            
+            switch (type) {
+                case 'checking':
+                    statusElement.style.background = '#fef3c7';
+                    statusElement.style.borderColor = '#f59e0b';
+                    statusElement.style.color = '#92400e';
+                    indicator.style.background = '#f59e0b';
+                    break;
+                case 'success':
+                    statusElement.style.background = '#d1fae5';
+                    statusElement.style.borderColor = '#10b981';
+                    statusElement.style.color = '#065f46';
+                    indicator.style.background = '#10b981';
+                    break;
+                case 'error':
+                    statusElement.style.background = '#fee2e2';
+                    statusElement.style.borderColor = '#ef4444';
+                    statusElement.style.color = '#991b1b';
+                    indicator.style.background = '#ef4444';
+                    break;
+            }
+        }
+        
+        function goHome() {
+            window.location.href = '/';
+        }
+        
+        // Auto-retry every 5 seconds
+        setInterval(() => {
+            if (retryCount < maxRetries) {
+                retryConnection();
+            }
+        }, 5000);
+        
+        // Initial retry
+        setTimeout(retryConnection, 1000);
+        
+        // Listen for online event
+        window.addEventListener('online', () => {
+            updateStatus('Connection detected! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 
