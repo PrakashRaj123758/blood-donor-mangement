@@ -11,7 +11,7 @@ app.use(express.json());
 
 // ✅ MongoDB Connection (Fixed)
 mongoose.connect(
-  "mongodb+srv://ramcharantelugu:ram123@cluster0.kgs4lu5.mongodb.net/bloodbank?retryWrites=true&w=majority&appName=Cluster0"
+  "mongodb+srv://Prakashraj:prakashrajofficial@cluster0.u29garw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 )
 .then(() => console.log("✅ MongoDB connected"))
 .catch((err) => console.error("❌ MongoDB connection failed:", err));
