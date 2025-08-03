@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path"); // ✅ 1. Add the 'path' module
 
 const app = express();
 const PORT = 5000;
@@ -9,14 +10,17 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-// ✅ MongoDB Connection (Fixed)
+// ✅ 2. Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, '')));
+
+// ✅ MongoDB Connection (No changes here)
 mongoose.connect(
   "mongodb+srv://Prakashraj:prakashrajofficial@cluster0.u29garw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 )
 .then(() => console.log("✅ MongoDB connected"))
 .catch((err) => console.error("❌ MongoDB connection failed:", err));
 
-// ✅ Mongoose Schemas
+// ✅ Mongoose Schemas (No changes here)
 const donorSchema = new mongoose.Schema({
   Donor_ID: String,
   Name: String,
@@ -70,10 +74,15 @@ const bloodTypeSchema = new mongoose.Schema({
 });
 const BloodType = mongoose.model("BloodType", bloodTypeSchema);
 
-// ✅ API Routes
+
+// ✅ API Routes (No changes to these routes)
+
+// ❌ 3. REMOVE the old root route
+/*
 app.get("/", (req, res) => {
   res.send("🚀 Blood Bank API is running");
 });
+*/
 
 // --- Donors ---
 app.post("/api/donors", async (req, res) => {
@@ -171,7 +180,8 @@ app.get("/api/blood-types", async (req, res) => {
   res.json(bloodTypes);
 });
 
-// ✅ Start Server
+
+// ✅ Start Server (No changes here)
 app.listen(PORT, () => {
   console.log(`🌐 Server running at http://localhost:${PORT}`);
 });
