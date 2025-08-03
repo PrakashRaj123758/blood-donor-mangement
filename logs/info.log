@@ -1,4 +1,0 @@
-{"timestamp":"2025-08-02T04:31:26.186Z","level":"INFO","message":"Server started on port 5000","data":{"environment":"development","timestamp":"2025-08-02T04:31:26.186Z"}}
-{"timestamp":"2025-08-02T04:31:26.985Z","level":"INFO","message":"Database connection established","data":null}
-{"timestamp":"2025-08-02T04:38:41.297Z","level":"INFO","message":"Server started on port 5000","data":{"environment":"development","timestamp":"2025-08-02T04:38:41.297Z"}}
-{"timestamp":"2025-08-02T04:38:41.523Z","level":"INFO","message":"Database connection established","data":null}
