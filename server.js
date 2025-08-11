@@ -23,6 +23,11 @@ mongoose
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection failed:", err));
 
+// ✅ Root route (for friendly message instead of "Cannot GET /")
+app.get("/", (req, res) => {
+  res.send("🚀 Blood Bank API is running");
+});
+
 // ✅ Schemas & Models
 const donorSchema = new mongoose.Schema({
   Donor_ID: String,
