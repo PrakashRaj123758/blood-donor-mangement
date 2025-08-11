@@ -173,14 +173,14 @@ app.get("/api/blood-types", async (req, res) => {
 
 // ================== Static Files & SPA Route Handling ==================
 // Serve all frontend files in current directory
+// Serve all static files in the root
 app.use(express.static(__dirname));
 
-// Catch-all route to serve index.html for non-API routes (SPA support)
-app.get("*", (req, res) => {
-    if (!req.path.startsWith("/api")) {
-        res.sendFile(path.join(__dirname, "index.html"));
-    }
+// Catch-all for non-API routes
+app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
 });
+
 
 // ================== Start Server ==================
 app.listen(PORT, () => {
