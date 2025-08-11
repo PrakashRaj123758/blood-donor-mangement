@@ -1,28 +1,29 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const path = require("path"); // ✅ For serving static files
+const path = require("path");
 
 const app = express();
 
-// ✅ Use Render's assigned port in production, fallback to 5000 for local dev
+// ✅ Use Render's port or fallback to 5000 for local dev
 const PORT = process.env.PORT || 5000;
 
 // ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
-// ✅ Serve static files (adjust path if you have a frontend build folder)
-app.use(express.static(path.join(__dirname, 'public')));
+// ✅ Serve static files if you have a frontend in 'public'
+app.use(express.static(path.join(__dirname, "public")));
 
 // ✅ MongoDB Connection
-mongoose.connect(
-  "mongodb+srv://Prakashraj:prakashrajofficial@cluster0.u29garw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-)
-.then(() => console.log("✅ MongoDB connected"))
-.catch((err) => console.error("❌ MongoDB connection failed:", err));
+mongoose
+  .connect(
+    "mongodb+srv://Prakashraj:prakashrajofficial@cluster0.u29garw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  )
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection failed:", err));
 
-// ✅ Mongoose Schemas & Models
+// ✅ Schemas & Models
 const donorSchema = new mongoose.Schema({
   Donor_ID: String,
   Name: String,
@@ -77,7 +78,6 @@ const bloodTypeSchema = new mongoose.Schema({
 const BloodType = mongoose.model("BloodType", bloodTypeSchema);
 
 // ✅ API Routes
-
 // --- Donors ---
 app.post("/api/donors", async (req, res) => {
   try {
@@ -88,10 +88,8 @@ app.post("/api/donors", async (req, res) => {
     res.status(500).json({ error: "Failed to add donor" });
   }
 });
-
 app.get("/api/donors", async (req, res) => {
-  const donors = await Donor.find();
-  res.json(donors);
+  res.json(await Donor.find());
 });
 
 // --- Recipients ---
@@ -104,10 +102,8 @@ app.post("/api/recipients", async (req, res) => {
     res.status(500).json({ error: "Failed to add recipient" });
   }
 });
-
 app.get("/api/recipients", async (req, res) => {
-  const recipients = await Recipient.find();
-  res.json(recipients);
+  res.json(await Recipient.find());
 });
 
 // --- Hospitals ---
@@ -120,10 +116,8 @@ app.post("/api/hospitals", async (req, res) => {
     res.status(500).json({ error: "Failed to add hospital" });
   }
 });
-
 app.get("/api/hospitals", async (req, res) => {
-  const hospitals = await Hospital.find();
-  res.json(hospitals);
+  res.json(await Hospital.find());
 });
 
 // --- Donor Transactions ---
@@ -136,10 +130,8 @@ app.post("/api/donor-transactions", async (req, res) => {
     res.status(500).json({ error: "Failed to save donor transaction" });
   }
 });
-
 app.get("/api/donor-transactions", async (req, res) => {
-  const txns = await DonorTransaction.find();
-  res.json(txns);
+  res.json(await DonorTransaction.find());
 });
 
 // --- Recipient Transactions ---
@@ -152,10 +144,8 @@ app.post("/api/recipient-transactions", async (req, res) => {
     res.status(500).json({ error: "Failed to save recipient transaction" });
   }
 });
-
 app.get("/api/recipient-transactions", async (req, res) => {
-  const txns = await RecipientTransaction.find();
-  res.json(txns);
+  res.json(await RecipientTransaction.find());
 });
 
 // --- Blood Types ---
@@ -168,18 +158,11 @@ app.post("/api/blood-types", async (req, res) => {
     res.status(500).json({ error: "Failed to save blood type" });
   }
 });
-
 app.get("/api/blood-types", async (req, res) => {
-  const bloodTypes = await BloodType.find();
-  res.json(bloodTypes);
-});
-
-// ✅ Fallback route for frontend SPA (if applicable)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.json(await BloodType.find());
 });
 
 // ✅ Start Server
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🌐 Server running on port ${PORT}`);
 });
