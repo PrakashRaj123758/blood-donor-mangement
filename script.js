@@ -1,138 +1,180 @@
-// DOM Elements
-const donorForm = document.getElementById("donorForm");
-const recipientForm = document.getElementById("recipientForm");
-const hospitalForm = document.getElementById("hospitalForm");
-
-const donorList = document.getElementById("donorList");
-const recipientList = document.getElementById("recipientList");
-const hospitalList = document.getElementById("hospitalList");
-
-// ===================== DONORS =====================
-
-// Fetch and display donors
-function fetchDonors() {
-    fetch("/api/donors")
-        .then(res => res.json())
-        .then(data => {
-            donorList.innerHTML = "";
-            data.forEach(donor => {
-                const li = document.createElement("li");
-                li.textContent = `${donor.Name} - ${donor.Blood_Type}`;
-                donorList.appendChild(li);
-            });
-        })
-        .catch(err => console.error("Error fetching donors:", err));
-}
-
-// Add donor from form
-if (donorForm) {
-    donorForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const donorData = {
-            Donor_ID: donorForm.Donor_ID.value,
-            Name: donorForm.Name.value,
-            Contact: donorForm.Contact.value,
-            Age: donorForm.Age.value,
-            Blood_Type: donorForm.Blood_Type.value,
-            Card_ID: donorForm.Card_ID.value
-        };
-        fetch("/api/donors", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(donorData)
-        })
-            .then(res => res.json())
-            .then(() => {
-                donorForm.reset();
-                fetchDonors();
-            })
-            .catch(err => console.error("Error adding donor:", err));
-    });
-}
-
-// ===================== RECIPIENTS =====================
-
-function fetchRecipients() {
-    fetch("/api/recipients")
-        .then(res => res.json())
-        .then(data => {
-            recipientList.innerHTML = "";
-            data.forEach(recipient => {
-                const li = document.createElement("li");
-                li.textContent = `${recipient.Name} - ${recipient.Blood_Type}`;
-                recipientList.appendChild(li);
-            });
-        })
-        .catch(err => console.error("Error fetching recipients:", err));
-}
-
-if (recipientForm) {
-    recipientForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const recipientData = {
-            Recipient_ID: recipientForm.Recipient_ID.value,
-            Name: recipientForm.Name.value,
-            Contact: recipientForm.Contact.value,
-            Age: recipientForm.Age.value,
-            Blood_Type: recipientForm.Blood_Type.value,
-            Card_ID: recipientForm.Card_ID.value
-        };
-        fetch("/api/recipients", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(recipientData)
-        })
-            .then(res => res.json())
-            .then(() => {
-                recipientForm.reset();
-                fetchRecipients();
-            })
-            .catch(err => console.error("Error adding recipient:", err));
-    });
-}
-
-// ===================== HOSPITALS =====================
-
-function fetchHospitals() {
-    fetch("/api/hospitals")
-        .then(res => res.json())
-        .then(data => {
-            hospitalList.innerHTML = "";
-            data.forEach(hospital => {
-                const li = document.createElement("li");
-                li.textContent = `${hospital.Name} - ${hospital.Address}`;
-                hospitalList.appendChild(li);
-            });
-        })
-        .catch(err => console.error("Error fetching hospitals:", err));
-}
-
-if (hospitalForm) {
-    hospitalForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const hospitalData = {
-            Hospital_ID: hospitalForm.Hospital_ID.value,
-            Name: hospitalForm.Name.value,
-            Address: hospitalForm.Address.value,
-            Contact: hospitalForm.Contact.value
-        };
-        fetch("/api/hospitals", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(hospitalData)
-        })
-            .then(res => res.json())
-            .then(() => {
-                hospitalForm.reset();
-                fetchHospitals();
-            })
-            .catch(err => console.error("Error adding hospital:", err));
-    });
-}
-
-// ===================== INITIAL LOAD =====================
+// ================= Sidebar Navigation =================
 document.addEventListener("DOMContentLoaded", () => {
+    const navLinks = document.querySelectorAll("nav ul li a");
+    const sections = document.querySelectorAll(".page-section");
+
+    navLinks.forEach(link => {
+        link.addEventListener("click", (e) => {
+            e.preventDefault(); // Stop page reload
+
+            // Remove active from all links
+            navLinks.forEach(l => l.classList.remove("active"));
+
+            // Set active link
+            link.classList.add("active");
+
+            // Hide all sections
+            sections.forEach(sec => sec.style.display = "none");
+
+            // Show selected section
+            const targetId = link.getAttribute("data-target");
+            document.getElementById(targetId).style.display = "block";
+        });
+    });
+
+    // Show dashboard on load
+    document.getElementById("dashboard-section").style.display = "block";
+
+    // Load initial data
+    fetchBloodTypes();
+    fetchHospitals();
     fetchDonors();
     fetchRecipients();
-    fetchHospitals();
+    fetchDonorTransactions();
+    fetchRecipientTransactions();
+});
+
+// ================= Helper: Fetch Wrapper =================
+async function fetchData(url) {
+    const res = await fetch(url);
+    return res.json();
+}
+
+// ================= Fetch & Render Functions =================
+async function fetchBloodTypes() {
+    const data = await fetchData("/api/blood-types");
+    const tableBody = document.querySelector("#blood-types-table tbody");
+    tableBody.innerHTML = "";
+    data.forEach(bt => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${bt.Blood_Type_ID}</td>
+                <td>${bt.Name}</td>
+            </tr>
+        `;
+    });
+}
+
+async function fetchHospitals() {
+    const data = await fetchData("/api/hospitals");
+    const tableBody = document.querySelector("#hospitals-table tbody");
+    tableBody.innerHTML = "";
+    data.forEach(h => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${h.Hospital_ID}</td>
+                <td>${h.Name}</td>
+                <td>${h.Address}</td>
+                <td>${h.Contact}</td>
+            </tr>
+        `;
+    });
+}
+
+async function fetchDonors() {
+    const data = await fetchData("/api/donors");
+    const tableBody = document.querySelector("#donors-table tbody");
+    tableBody.innerHTML = "";
+    data.forEach(d => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${d.Donor_ID}</td>
+                <td>${d.Name}</td>
+                <td>${d.Contact}</td>
+                <td>${d.Age}</td>
+                <td>${d.Blood_Type}</td>
+                <td>${d.Card_ID}</td>
+            </tr>
+        `;
+    });
+}
+
+async function fetchRecipients() {
+    const data = await fetchData("/api/recipients");
+    const tableBody = document.querySelector("#recipients-table tbody");
+    tableBody.innerHTML = "";
+    data.forEach(r => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${r.Recipient_ID}</td>
+                <td>${r.Name}</td>
+                <td>${r.Contact}</td>
+                <td>${r.Age}</td>
+                <td>${r.Blood_Type}</td>
+                <td>${r.Card_ID}</td>
+            </tr>
+        `;
+    });
+}
+
+async function fetchDonorTransactions() {
+    const data = await fetchData("/api/donor-transactions");
+    const tableBody = document.querySelector("#donor-transactions-table tbody");
+    tableBody.innerHTML = "";
+    data.forEach(t => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${t.Transaction_ID}</td>
+                <td>${t.Donor_ID}</td>
+                <td>${t.Hospital_ID}</td>
+                <td>${t.Date}</td>
+                <td>${t.Confirmation_Code}</td>
+                <td>${t.Health_Status}</td>
+            </tr>
+        `;
+    });
+}
+
+async function fetchRecipientTransactions() {
+    const data = await fetchData("/api/recipient-transactions");
+    const tableBody = document.querySelector("#recipient-transactions-table tbody");
+    tableBody.innerHTML = "";
+    data.forEach(t => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${t.Transaction_ID}</td>
+                <td>${t.Recipient_ID}</td>
+                <td>${t.Hospital_ID}</td>
+                <td>${t.Date}</td>
+                <td>${t.Blood_Type}</td>
+            </tr>
+        `;
+    });
+}
+
+// ================= Form Handling =================
+document.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+
+    let endpoint = "";
+    if (form.id === "blood-type-form") endpoint = "/api/blood-types";
+    if (form.id === "hospital-form") endpoint = "/api/hospitals";
+    if (form.id === "donor-form") endpoint = "/api/donors";
+    if (form.id === "recipient-form") endpoint = "/api/recipients";
+    if (form.id === "donor-transaction-form") endpoint = "/api/donor-transactions";
+    if (form.id === "recipient-transaction-form") endpoint = "/api/recipient-transactions";
+
+    const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+        alert("✅ Data saved successfully");
+        form.reset();
+
+        // Refresh data after adding new record
+        if (form.id === "blood-type-form") fetchBloodTypes();
+        if (form.id === "hospital-form") fetchHospitals();
+        if (form.id === "donor-form") fetchDonors();
+        if (form.id === "recipient-form") fetchRecipients();
+        if (form.id === "donor-transaction-form") fetchDonorTransactions();
+        if (form.id === "recipient-transaction-form") fetchRecipientTransactions();
+    } else {
+        alert("❌ Failed to save data");
+    }
 });
