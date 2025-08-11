@@ -7,11 +7,11 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ================== Middleware ==================
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// ================== MongoDB Connection ==================
+// MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -19,7 +19,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log("✅ MongoDB connected"))
 .catch((err) => console.error("❌ MongoDB connection failed:", err));
 
-// ================== Schemas & Models ==================
+// ================== Schemas ==================
 const donorSchema = new mongoose.Schema({
     Donor_ID: String,
     Name: String,
@@ -81,14 +81,13 @@ app.post("/api/donors", async (req, res) => {
         const donor = new Donor(req.body);
         await donor.save();
         res.status(201).json({ message: "Donor added successfully" });
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Failed to add donor" });
     }
 });
 
 app.get("/api/donors", async (req, res) => {
-    const donors = await Donor.find();
-    res.json(donors);
+    res.json(await Donor.find());
 });
 
 // Recipients
@@ -97,14 +96,13 @@ app.post("/api/recipients", async (req, res) => {
         const recipient = new Recipient(req.body);
         await recipient.save();
         res.status(201).json({ message: "Recipient added successfully" });
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Failed to add recipient" });
     }
 });
 
 app.get("/api/recipients", async (req, res) => {
-    const recipients = await Recipient.find();
-    res.json(recipients);
+    res.json(await Recipient.find());
 });
 
 // Hospitals
@@ -113,14 +111,13 @@ app.post("/api/hospitals", async (req, res) => {
         const hospital = new Hospital(req.body);
         await hospital.save();
         res.status(201).json({ message: "Hospital added successfully" });
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Failed to add hospital" });
     }
 });
 
 app.get("/api/hospitals", async (req, res) => {
-    const hospitals = await Hospital.find();
-    res.json(hospitals);
+    res.json(await Hospital.find());
 });
 
 // Donor Transactions
@@ -129,14 +126,13 @@ app.post("/api/donor-transactions", async (req, res) => {
         const txn = new DonorTransaction(req.body);
         await txn.save();
         res.status(201).json({ message: "Donor transaction saved" });
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Failed to save donor transaction" });
     }
 });
 
 app.get("/api/donor-transactions", async (req, res) => {
-    const txns = await DonorTransaction.find();
-    res.json(txns);
+    res.json(await DonorTransaction.find());
 });
 
 // Recipient Transactions
@@ -145,14 +141,13 @@ app.post("/api/recipient-transactions", async (req, res) => {
         const txn = new RecipientTransaction(req.body);
         await txn.save();
         res.status(201).json({ message: "Recipient transaction saved" });
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Failed to save recipient transaction" });
     }
 });
 
 app.get("/api/recipient-transactions", async (req, res) => {
-    const txns = await RecipientTransaction.find();
-    res.json(txns);
+    res.json(await RecipientTransaction.find());
 });
 
 // Blood Types
@@ -161,26 +156,20 @@ app.post("/api/blood-types", async (req, res) => {
         const bt = new BloodType(req.body);
         await bt.save();
         res.status(201).json({ message: "Blood Type saved" });
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Failed to save blood type" });
     }
 });
 
 app.get("/api/blood-types", async (req, res) => {
-    const bloodTypes = await BloodType.find();
-    res.json(bloodTypes);
+    res.json(await BloodType.find());
 });
 
-// ================== Static Files & SPA Route Handling ==================
-// Serve all frontend files in current directory
-// Serve all static files in the root
+// ================== Static Files & SPA Fallback ==================
 app.use(express.static(__dirname));
-
-// Catch-all for non-API routes
 app.get(/^\/(?!api).*/, (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
-
 
 // ================== Start Server ==================
 app.listen(PORT, () => {
