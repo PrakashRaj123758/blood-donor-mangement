@@ -1,26 +1,28 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const path = require("path"); // ✅ 1. Add the 'path' module
+const path = require("path"); // ✅ For serving static files
 
 const app = express();
-const PORT = 5000;
+
+// ✅ Use Render's assigned port in production, fallback to 5000 for local dev
+const PORT = process.env.PORT || 5000;
 
 // ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
-// ✅ 2. Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, '')));
+// ✅ Serve static files (adjust path if you have a frontend build folder)
+app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ MongoDB Connection (No changes here)
+// ✅ MongoDB Connection
 mongoose.connect(
   "mongodb+srv://Prakashraj:prakashrajofficial@cluster0.u29garw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 )
 .then(() => console.log("✅ MongoDB connected"))
 .catch((err) => console.error("❌ MongoDB connection failed:", err));
 
-// ✅ Mongoose Schemas (No changes here)
+// ✅ Mongoose Schemas & Models
 const donorSchema = new mongoose.Schema({
   Donor_ID: String,
   Name: String,
@@ -74,15 +76,7 @@ const bloodTypeSchema = new mongoose.Schema({
 });
 const BloodType = mongoose.model("BloodType", bloodTypeSchema);
 
-
-// ✅ API Routes (No changes to these routes)
-
-// ❌ 3. REMOVE the old root route
-/*
-app.get("/", (req, res) => {
-  res.send("🚀 Blood Bank API is running");
-});
-*/
+// ✅ API Routes
 
 // --- Donors ---
 app.post("/api/donors", async (req, res) => {
@@ -180,8 +174,12 @@ app.get("/api/blood-types", async (req, res) => {
   res.json(bloodTypes);
 });
 
+// ✅ Fallback route for frontend SPA (if applicable)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
-// ✅ Start Server (No changes here)
-app.listen(PORT, () => {
-  console.log(`🌐 Server running at http://localhost:${PORT}`);
+// ✅ Start Server
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🌐 Server running on port ${PORT}`);
 });
