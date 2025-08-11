@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ Serve static files if you have a frontend in 'public'
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "")));
 
 // ✅ MongoDB Connection
 mongoose
