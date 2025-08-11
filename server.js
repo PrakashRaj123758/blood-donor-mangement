@@ -11,8 +11,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-// Serve static frontend from public/
-app.use(express.static(path.join(__dirname, "")));
+
+// ✅ Serve static frontend files from current directory
+app.use(express.static(__dirname));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
@@ -152,6 +153,15 @@ app.post("/api/blood-types", async (req, res) => {
   }
 });
 
+
+
+// ✅ Catch-all route to serve index.html for SPA routes
+app.get("*", (req, res) => {
+  // Only serve index.html if request is not for API
+  if (!req.path.startsWith("/api")) {
+    res.sendFile(path.join(__dirname, "index.html"));
+  }
+});
 
 
 // Start server
